@@ -20,3 +20,33 @@ cd veridian
 # Compila e instala la herramienta 'veridian'
 cargo build --release
 # (Instrucciones de instalación futuras aquí)
+```
+
+## 2. Tu Primer Programa
+
+Crea un fichero llamado `main.v` con el siguiente contenido:
+
+```veridian{line-numbers="true"}
+// main.v
+package io;
+
+func main() {
+  io.print("¡Mi primer programa en Veridian funciona!");
+}
+```
+
+## 3. Compila y Ejecuta
+
+Desde tu terminal, usa la herramienta de Veridian para compilar y ejecutar tu fichero:
+
+```bash
+veridian run main.v
+```
+
+Deberías ver el siguiente resultado en tu consola:
+
+```text
+¡Mi primer programa en Veridian funciona!
+```
+
+¡Felicidades! Ahora estás listo para explorar el resto de las características del lenguaje.
