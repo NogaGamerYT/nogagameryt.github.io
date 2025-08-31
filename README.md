@@ -1,1 +1,3 @@
-# nogagameryt.github.io
+# `Veridian Lang`
+
+Veridian es un lenguaje compilado.
