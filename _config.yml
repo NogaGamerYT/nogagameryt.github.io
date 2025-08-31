@@ -1,8 +1,8 @@
 # _config.yml
 
-title: "Veridian: El Lenguaje de Programación"
-description: "Un lenguaje que fusiona la facilidad de uso, el rendimiento y la seguridad."
+title: "Veridian Lang"
+description: "Un lenguaje de programación que fusiona la facilidad de uso, el rendimiento y la seguridad."
 
-# Elige un tema. 'minima' es el por defecto, pero 'just-the-docs' es excelente para documentación.
-# Para usarlo, sigue las instrucciones de ese tema. Empecemos con el básico.
-theme: minima 
+# Para el correcto funcionamiento en GitHub Pages.
+# 'just-the-docs' es excelente para documentación.
+theme: minima
