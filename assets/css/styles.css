@@ -1,0 +1,90 @@
+/* assets/css/styles.css */
+
+/* --- Variables de Color (El Tema de Veridian) --- */
+/* Definir los colores aquí hace que sea muy fácil cambiar el tema del sitio. */
+:root {
+  --color-background: #1a1a1a; /* Un gris oscuro, casi negro */
+  --color-text: #e0e0e0;       /* Un gris claro para el texto */
+  --color-primary: #00b894;    /* Un verde menta vibrante, como el nombre Veridian */
+  --color-header-bg: #2d2d2d;  /* Un gris un poco más claro para la cabecera */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-family-mono: "SF Mono", "Consolas", "Liberation Mono", Menlo, Courier, monospace;
+}
+
+/* --- Reseteo y Base Global --- */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-sans);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+/* --- Layout Principal --- */
+/* Centramos el contenido y le damos un ancho máximo para legibilidad. */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* --- Cabecera y Navegación --- */
+header {
+  background-color: var(--color-header-bg);
+  padding: 1rem 2rem;
+  border-bottom: 2px solid var(--color-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+header h1 a {
+  color: #fff;
+  text-decoration: none;
+}
+
+nav a {
+  color: var(--color-text);
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: bold;
+  transition: color 0.2s ease-in-out;
+}
+
+nav a:hover {
+  color: var(--color-primary);
+}
+
+/* --- Estilos para el Contenido --- */
+main {
+  padding-top: 2rem;
+}
+
+h1, h2, h3 {
+  color: #fff;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Estilo para el código DENTRO de un párrafo (inline code) */
+/* Esto no afecta a los bloques de Prism, solo a `código como este`. */
+code {
+  background-color: #333;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: var(--font-family-mono);
+  font-size: 0.9em;
+}
