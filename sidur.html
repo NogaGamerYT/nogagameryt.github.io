@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Sidur Sefardí - Nusaj Edot HaMizraj (PWA Offline)</title>
+  <meta name="theme-color" content="#000000">
+  <style>
+    :root {
+      --bg-color: #000000;
+      --surface-color: #111111;
+      --card-border: #222222;
+      --text-main: #e0e0e0;
+      --text-muted: #999999;
+      --gold-accent: #d4af37;
+      --gold-border: #d4af37;
+      --highlight: rgba(212, 175, 55, 0.15);
+      --font-size-base: 18px;
+      --line-height: 1.85;
+      --card-gap: 16px;
+    }
+
+    body.theme-sepia {
+      --bg-color: #f4ecd8;
+      --surface-color: #eae1ca;
+      --card-border: #d1c29f;
+      --text-main: #2d241e;
+      --text-muted: #6b5849;
+      --gold-accent: #8c5a2b;
+      --gold-border: #b8860b;
+      --highlight: rgba(140, 90, 43, 0.15);
+    }
+
+    body.theme-light {
+      --bg-color: #f8f9fa;
+      --surface-color: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #212529;
+      --text-muted: #64748b;
+      --gold-accent: #b8860b;
+      --gold-border: #d4af37;
+      --highlight: rgba(184, 134, 11, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: var(--font-size-base);
+      line-height: var(--line-height);
+      transition: background-color 0.2s ease, color 0.2s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* BARRA SUPERIOR FIJA */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--surface-color);
+      border-bottom: 1px solid var(--card-border);
+      padding: 8px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon:active {
+      background-color: var(--highlight);
+    }
+
+    .header-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gold-accent);
+      white-space: nowrap;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .control-pill {
+      background: var(--surface-color);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-pill.active {
+      border-color: var(--gold-border);
+      color: var(--gold-accent);
+      background-color: var(--highlight);
+    }
+
+    /* BARRA DE VISTAS TRIPARTITAS */
+    .view-selector-bar {
+      display: flex;
+      overflow-x: auto;
+      background: var(--surface-color);
+      border-bottom: 1px solid var(--card-border);
+      padding: 6px 12px;
+      gap: 8px;
+    }
+
+    .view-btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .view-btn.active {
+      color: var(--gold-accent);
+      border-color: var(--gold-border);
+      background-color: var(--highlight);
+    }
+
+    /* INTERRUPTOR MODO CAMPAÑA */
+    .campana-banner {
+      background: var(--surface-color);
+      border: 1px solid var(--gold-border);
+      margin: 12px 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .campana-text h3 {
+      font-size: 0.95rem;
+      color: var(--gold-accent);
+      margin-bottom: 2px;
+    }
+
+    .campana-text p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--card-border);
+      transition: .3s;
+      border-radius: 28px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #ffffff;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--gold-accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    main {
+      flex: 1;
+      padding: 12px 16px 80px 16px;
+      max-width: 820px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .section-header-card {
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: var(--surface-color);
+      border-left: 4px solid var(--gold-accent);
+      border-radius: 4px 8px 8px 4px;
+    }
+
+    .section-header-card h2 {
+      font-size: 1.15rem;
+      color: var(--gold-accent);
+    }
+
+    .section-header-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* MICRO-TARJETAS SENSORIALES (ANTI-WALL-OF-TEXT) */
+    .micro-card {
+      background-color: var(--surface-color);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: var(--card-gap);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: border-color 0.2s ease;
+    }
+
+    .micro-card:hover {
+      border-color: rgba(212, 175, 55, 0.4);
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed var(--card-border);
+      padding-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background-color: var(--highlight);
+      color: var(--gold-accent);
+      font-weight: 600;
+    }
+
+    .instruccion-box {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      background: rgba(212, 175, 55, 0.08);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border-left: 3px solid var(--gold-accent);
+      font-style: italic;
+    }
+
+    /* CAPAS TRIPARTITAS */
+    .layer-hebrew {
+      direction: rtl;
+      text-align: right;
+      font-family: "SBL Hebrew", "David", "Times New Roman", serif;
+      font-size: calc(var(--font-size-base) * 1.3);
+      line-height: 1.9;
+      color: var(--text-main);
+      padding: 4px 0 10px 0;
+      word-spacing: 3px;
+    }
+
+    .layer-divider {
+      height: 1px;
+      background: var(--card-border);
+      margin: 10px 0;
+    }
+
+    .layer-phonetic {
+      direction: ltr;
+      text-align: left;
+      font-size: var(--font-size-base);
+      line-height: var(--line-height);
+      color: var(--text-main);
+      padding: 4px 0 8px 0;
+      font-weight: 500;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .layer-spanish {
+      direction: ltr;
+      text-align: left;
+      font-size: calc(var(--font-size-base) * 0.95);
+      line-height: var(--line-height);
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 4px 0;
+    }
+
+    .kavana-box {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--gold-accent);
+      border-top: 1px dotted var(--card-border);
+      padding-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* VISTA DE COLUMNAS PARALELAS */
+    .parallel-carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 12px;
+      padding-bottom: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .parallel-column {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      background: var(--surface-color);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .parallel-col-header {
+      font-size: 0.9rem;
+      color: var(--gold-accent);
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-align: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    /* ACCORDION DRAWER LATERAL */
+    .drawer-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 200;
+    }
+
+    .drawer-overlay.open {
+      display: block;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      width: 82%;
+      max-width: 320px;
+      background: var(--surface-color);
+      border-right: 1px solid var(--card-border);
+      z-index: 250;
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .drawer-header h2 {
+      font-size: 1.05rem;
+      color: var(--gold-accent);
+    }
+
+    .drawer-menu {
+      list-style: none;
+      padding: 8px 0;
+    }
+
+    .drawer-item {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      color: var(--text-main);
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: background 0.15s ease;
+    }
+
+    .drawer-item:hover, .drawer-item.active {
+      background-color: var(--highlight);
+      color: var(--gold-accent);
+      border-left: 4px solid var(--gold-accent);
+    }
+
+    /* FOOTER OFFLINE BAR */
+    footer {
+      background: var(--surface-color);
+      border-top: 1px solid var(--card-border);
+      padding: 8px 16px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+    }
+  </style>
+</head>
+<body class="theme-dark">
+
+  <!-- OVERLAY DEL MENÚ LATERAL -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer(false)"></div>
+
+  <!-- MENÚ LATERAL (ACCORDION DRAWER) -->
+  <nav class="drawer" id="sideDrawer">
+    <div class="drawer-header">
+      <h2>Seder Litúrgico Sefardí</h2>
+      <button class="btn-icon" onclick="toggleDrawer(false)" aria-label="Cerrar menú">✕</button>
+    </div>
+    <ul class="drawer-menu">
+      <li class="drawer-item" onclick="selectCategory('ikariyot')">🌟 Tefilot Ikariyot (Oraciones Principales)</li>
+      <li class="drawer-item active" onclick="selectCategory('shajarit')">🌅 Shajarit (Rezo Matutino)</li>
+      <li class="drawer-item" onclick="selectCategory('minja')">🌇 Minjá (Rezo de la Tarde)</li>
+      <li class="drawer-item" onclick="selectCategory('arvit')">🌙 Arvit (Rezo Nocturno)</li>
+      <li class="drawer-item" onclick="selectCategory('shabat')">🕯️ Shabat Kódesh y Havdalá</li>
+      <li class="drawer-item" onclick="selectCategory('moadim')">🍇 Moadim (Fiestas y Días Sagrados)</li>
+      <li class="drawer-item" onclick="selectCategory('alimentos')">🥖 Alimentos y Birkat HaMazón</li>
+      <li class="drawer-item" onclick="selectCategory('especiales')">📜 Plegarias Sefardíes Especiales (Sidur Shelomó)</li>
+    </ul>
+    <div style="padding: 16px; margin-top: auto; border-top: 1px solid var(--card-border); font-size: 0.75rem; color: var(--text-muted);">
+      Nusaj Edot HaMizraj • Shulján Arúj / Yalkút Yoséf<br>
+      Optimizado 100% Offline para teléfonos Android
+    </div>
+  </nav>
+
+  <!-- CABECERA PRINCIPAL -->
+  <header>
+    <div class="header-title-box">
+      <button class="btn-icon" onclick="toggleDrawer(true)" aria-label="Abrir Menú Litúrgico">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <div class="header-title" id="currentSectionTitle">Shajarit Sefardí</div>
+    </div>
+
+    <!-- CONTROLES DINÁMICOS: TIPOGRAFÍA & TEMAS -->
+    <div class="header-controls">
+      <!-- BOTONES +/- TIPOGRAFÍA -->
+      <button class="control-pill" onclick="changeFontSize(-2)" title="Reducir fuente">A-</button>
+      <button class="control-pill" onclick="changeFontSize(2)" title="Aumentar fuente">A+</button>
+      
+      <!-- SELECTOR DE TEMA -->
+      <button class="control-pill" id="themeBtn" onclick="cycleTheme()" title="Cambiar tema de color">🌑 OLED</button>
+    </div>
+  </header>
+
+  <!-- MOTOR DE VISTAS TRIPARTITAS -->
+  <div class="view-selector-bar">
+    <button class="view-btn active" id="btn-interlinear" onclick="setViewMode('interlinear')">Interlineal Sincronizada</button>
+    <button class="view-btn" id="btn-parallel" onclick="setViewMode('parallel')">Columnas Paralelas</button>
+    <button class="view-btn" id="btn-phonetic" onclick="setViewMode('phonetic_only')">Solo Fonética</button>
+    <button class="view-btn" id="btn-spanish" onclick="setViewMode('spanish_only')">Solo Español</button>
+    <button class="view-btn" id="btn-hebrew" onclick="setViewMode('hebrew_only')">Solo Hebreo</button>
+  </div>
+
+  <!-- INTERRUPTOR MODO CAMPAÑA (SOLO SHAJARIT) -->
+  <div class="campana-banner" id="campanaBanner">
+    <div class="campana-text">
+      <h3>Modo Campaña Halájico (Tefilot Ikariyot)</h3>
+      <p>Filtra únicamente las oraciones obligatorias y oculta salmos secundarios.</p>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="campanaToggle" onchange="toggleCampana(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL: MICRO-TARJETAS SENSORIALES -->
+  <main id="prayerContainer">
+    <!-- Se inyecta dinámicamente -->
+  </main>
+
+  <!-- BARRA INFERIOR OFFLINE -->
+  <footer>
+    100% Offline • Sin conexión requerida • Sidur Sefardí Accesible
+  </footer>
+
+  <script>
+    // DATOS LITÚRGICOS COMPLETOS
+    const PRAYERS_DATA = {
+      shajarit: [
+        {
+          id: 'sh-1',
+          titulo: 'Netilat Yadayim (Lavado Matutino)',
+          subtitulo: 'Verter agua 3 veces alternadas',
+          instruccion: 'Verter agua tres veces alternas sobre las manos (derecha, izquierda):',
+          esencial: true,
+          hebreo: 'בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו, וְצִוָּנוּ עַל נְטִילַת יָדָיִם.',
+          fonetica: 'Barúj Atá Adonái, Elohénu Mélej Ha\'Olám, ashér kideshánu bemitzvotáv, vetzivánu \'al netilát yadáyim.',
+          espanol: 'Bendito eres Tú, Eterno, Dios nuestro, Rey del Universo, que nos santificó con Sus mandamientos y nos ordenó sobre el lavado de manos.',
+          kavana: 'Purificación de las manos al despertar para consagrar los actos del día.'
+        },
+        {
+          id: 'sh-2',
+          titulo: 'Asher Yatzar (La Creación del Cuerpo)',
+          subtitulo: 'Agradecimiento por el milagro biológico continuo',
+          instruccion: 'Recitar tras el servicio sanitario:',
+          esencial: true,
+          hebreo: 'בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר יָצַר אֶת־הָאָדָם בְּחָכְמָה, וּבָרָא בוֹ נְקָבִים נְקָבִים, חֲלוּלִים חֲלוּלִים. גָּלוּי וְיָדוּעַ לִפְנֵי כִסֵּא כְבוֹדֶךָ, שֶׁאִם יִסָּתֵם אֶחָד מֵהֶם, אוֹ אִם יִפָּתַח אֶחָד מֵהֶם, אֵין כָּל־בְּרִיָּה יְכוֹלָה לְהִתְקַיֵּם לְפָנֶיךָ אֲפִלּוּ שָׁעָה אֶחָת. בָּרוּךְ אַתָּה יְהֹוָה, רוֹפֵא כָל־בָּשָׂר וּמַפְלִיא לַעֲשׂוֹת.',
+          fonetica: 'Barúj Atá Adonái, Elohénu Mélej Ha\'Olám, ashér yatzár et-ha\'adám bejojmá, uvará vo nekavím nekavím, jalulím jalulím. Galúi veyadúa\' lifné kisé jevodéja, she\'im yisatém ejád mehém, o im yipatáj ejád mehém, en kol-beriyá yejolá lehitkayém lefanéja afílu sha\'á eját. Barúj Atá Adonái, rofé jol-basár umaflí la\'asót.',
+          espanol: 'Bendito eres Tú, Eterno, Dios nuestro, Rey del Universo, que formó al ser humano con sabiduría y creó en él conductos y cavidades. Manifiesto y sabido es ante Tu trono de gloria que si uno de ellos se obstruyera o se abriese, nadie podría subsistir ante Ti ni una sola hora. Bendito eres Tú, Eterno, Médico de toda carne y Hacedor de maravillas.',
+          kavana: 'Reconocimiento de la maravillosa ingeniería del cuerpo y la salud.'
+        },
+        {
+          id: 'sh-3',
+          titulo: 'Elokai Neshama (El Alma Pura)',
+          subtitulo: 'Retorno de la conciencia limpia al amanecer',
+          instruccion: 'Recitar con sosiego mental:',
+          esencial: true,
+          hebreo: 'אֱלֹהַי, נְשָׁמָה שֶׁנָּתַתָּ בִּי טְהוֹרָה הִיא. אַתָּה בְרָאתָהּ, אַתָּה יְצַרְתָּהּ, אַתָּה נְפַחְתָּהּ בִּי, וְאַתָּה מְשַׁמְּרָהּ בְּקִרְבִּי... בָּרוּךְ אַתָּה יְהֹוָה, הַמַּחֲזִיר נְשָׁמוֹת לִפְגָרִים מֵתִים.',
+          fonetica: 'Elohái, neshamá shenatata bi tehorá hi. Atá veratáh, Atá yetzartáh, Atá nefahtáh bi, ve-Atá meshamráh bekirbí... Barúj Atá Adonái, hamajazír neshamót lifgarím metím.',
+          espanol: 'Dios mío: el alma que infundiste en mí es pura. Tú la creaste, Tú la formaste, Tú la insuflaste en mí y Tú la custodias en mi interior... Bendito eres Tú, Eterno, que devuelve las almas a cuerpos inertes.',
+          kavana: 'El alma despierta libre de contaminación previa.'
+        },
+        {
+          id: 'sh-4',
+          titulo: 'Birjot HaShajar (Las 15 Bendiciones Matutinas)',
+          subtitulo: 'Discernimiento, vista, movilidad, libertad y fortaleza',
+          instruccion: 'Recitar cada una pausadamente:',
+          esencial: true,
+          hebreo: 'בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, הַנּוֹתֵן לַשֶּׂכְוִי בִינָה לְהַבְחִין בֵּין יוֹם וּבֵין לָיְלָה... פּוֹקֵחַ עִוְרִים... מַתִּיר אֲסוּרִים... זוֹקֵף כְּפוּפִים... רוֹקַע הָאָרֶץ עַל־הַמָּיִם... שֶׁעָשָׂה לִי כָּל־צָרְכִּי... אוֹזֵר יִשְׂרָאֵל בִּגְבוּרָה... עוֹטֵר יִשְׂרָאֵל בְּתִפְאָרָה... הַנּוֹתֵן לַיָּעֵף כֹּחַ.',
+          fonetica: 'Barúj Atá Adonái, Elohénu Mélej Ha\'Olám, hanotén lasejví viná lehavjín ben yom uvén láyla... pokéaj \'ivrím... matír asurím... zokéf kefufím... roka\' ha\'áretz \'al-hamáyim... she\'asá li kol-tzarkí... ozér Yisraél bigvurá... \'otér Yisraél betif\'ará... hanotén laya\'éf kóaj.',
+          espanol: 'Bendito eres Tú, Eterno, Dios nuestro, Rey del Universo, que otorga entendimiento para discernir entre el día y la noche... que abre los ojos de los ciegos... que libera a los cautivos... que endereza a los encorvados... que extiende la tierra firme sobre las aguas... que proveyó todas mis necesidades... que ciñe a Israel de fortaleza... que corona a Israel de esplendor... que otorga vigor al fatigado.',
+          kavana: 'Agradecimiento detallado por cada sentido y facultad motora recuperada.'
+        },
+        {
+          id: 'sh-5',
+          titulo: 'Birjot HaTora & Birkat Kohanim',
+          subtitulo: 'Estudio de la sabiduría y bendición sacerdotal de paz',
+          instruccion: 'Precepto diario del estudio sagrado:',
+          esencial: true,
+          hebreo: 'בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו, וְצִוָּנוּ עַל דִּבְרֵי תוֹרָה. יְבָרֶכְךָ יְהֹוָה וְיִשְׁמְרֶךָ׃ יָאֵר יְהֹוָה פָּנָיו אֵלֶיךָ וִיחֻנֶּךָּ׃ יִשָּׂא יְהֹוָה פָּנָיו אֵלֶיךָ וְיָשֵׂם לְךָ שָׁלוֹם׃',
+          fonetica: 'Barúj Atá Adonái, Elohénu Mélej Ha\'Olám, ashér kideshánu bemitzvotáv, vetzivánu \'al divré Torá. Yevarejejá Adonái veyishmeréja. Ya\'ér Adonái panáv eléja vijunéka. Yisá Adonái panáv eléja veyasém lejá shalóm.',
+          espanol: 'Bendito eres Tú, Eterno, Dios nuestro, Rey del Universo, que nos santificó con Sus preceptos y nos ordenó ocuparnos en las palabras de la Torá. Que el Eterno te bendiga y te guarde; que el Eterno ilumine Su faz hacia ti y te agracie; que el Eterno eleve Su rostro hacia ti y te conceda la paz.',
+          kavana: 'Paz y preservación mental a través de la sabiduría.'
+        },
+        {
+          id: 'sh-6',
+          titulo: 'Parashat HaTamid y Pitum HaKetoret',
+          subtitulo: 'Ofrenda continua del Templo y los 11 ingredientes del incienso',
+          instruccion: 'Se recita pausadamente para disipar influencias adversas:',
+          esencial: false,
+          hebreo: 'וַיְדַבֵּר יְהֹוָה אֶל־מֹשֶׁה לֵּאמֹר׃ צַו אֶת־בְּנֵי יִשְׂרָאֵל וְאָמַרְתָּ אֲלֵהֶם, אֶת־קָרְבָּנִי לַחְמִי לְאִשַּׁי... פִּטּוּם הַקְּטֹרֶת: הַצֳּרִי, וְהַצִּפּוֹרֶן, וְהַחֶלְבְּנָה, וְהַלְּבוֹנָה... מוֹר, וּקְצִיעָה, וְשִׁבּוֹלֶת נֵרְדְּ, וְכַרְכֹּם, קוֹשְׂטְ, קִלּוּפָה, קִנָּמוֹן.',
+          fonetica: 'Vayedabér Adonái el-Moshé lemór: Tzav et-bené Yisraél... Pitúm haketóret: hatzorí, vehatzipóren, vehajelbená, vehalevoná... mor, uktzi\'á, veshibólet nerd, vejarkóm, kosht, kilufá, kinamón.',
+          espanol: 'Y habló el Eterno a Moisés: Ordena a los hijos de Israel y diles: Mi ofrenda continua... El incienso aromático: bálsamo, uña, gálbano, incienso, mirra, casia, nardo, azafrán, costo, corteza y canela.',
+          kavana: 'Equilibrio de las fuerzas espirituales en armonía.'
+        },
+        {
+          id: 'sh-7',
+          titulo: 'Pesuke DeZimra (Baruj SheAmar, Ashrei y Salmo 150)',
+          subtitulo: 'Salmos de alabanza matutina',
+          instruccion: 'Ponerse de pie para Baruj SheAmar:',
+          esencial: false,
+          hebreo: 'בָּרוּךְ שֶׁאָמַר וְהָיָה הָעוֹלָם, בָּרוּךְ הוּא... אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ... פּוֹתֵחַ אֶת־יָדֶךָ, וּמַשְׂבִּיעַ לְכָל־חַי רָצוֹן... כֹּל הַנְּשָׁמָה תְּהַלֵּל יָהּ, הַלְלוּיָהּ!',
+          fonetica: 'Barúj she\'amár vehayá ha\'olám, barúj Hu... Ashré yoshevé vetéja... Potéaj et-yadéja, umasbía\' lejol-jái ratzón... Kol haneshamá tehalél Yah, Haleluyáh!',
+          espanol: 'Bendito Aquel que habló y existió el mundo, ¡bendito sea! Dichosos los que moran en Tu casa... Abres Tu mano y satisfaces el deseo de todo ser vivo... ¡Todo hálito de vida alabe al Señor! ¡Haleluyah!',
+          kavana: 'Sintonización de la respiración con la alabanza cósmica.'
+        },
+        {
+          id: 'sh-8',
+          titulo: 'Keriat Shema Yisrael Completo (3 Párrafos)',
+          subtitulo: 'Shemá, Baruj Shem, VeAhavtá, VeHayá Im Shamóa, VaYómer',
+          instruccion: 'Cubrirse los ojos con la mano derecha:',
+          esencial: true,
+          hebreo: 'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד! בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד. וְאָהַבְתָּ אֵת יְהֹוָה אֱלֹהֶיךָ בְּכָל־לְבָבְךָ וּבְכָל־נַפְשְׁךָ וּבְכָל־מְאֹדֶךָ... וְהָיָה אִם־שָׁמֹעַ תִּשְׁמְעוּ... וַיֹּאמֶר יְהֹוָה אֶל־מֹשֶׁה... אֲנִי יְהֹוָה אֱלֹהֵיכֶם אֲשֶׁר הוֹצֵאתִי אֶתְכֶם מֵאֶרֶץ מִצְרָיִם. אֱמֶת!',
+          fonetica: 'SHEMÁ YISRAÉL, ADONÁI ELOHÉNU, ADONÁI EJÁD! Barúj shem kevod maljutó le\'olám va\'ed. Ve\'ahavtá et Adonái Elohéja bejol-levavejá uvjol-nafshejá uvjol-me\'odéja... Vehayá im-shamó\'a... Vayómer Adonái... Aní Adonái Elohejém ashér hotzéti etjém me\'éretz Mitzráyim. Emét!',
+          espanol: '¡ESCUCHA, ISRAEL: EL ETERNO ES NUESTRO DIOS, EL ETERNO ES UNO! Bendito sea el Nombre de la Gloria de Su Reino por siempre jamás. Y amarás al Eterno tu Dios con todo tu corazón, con toda tu alma y con todos tus recursos... Y sucederá si obedecéis... Yo soy el Eterno vuestro Dios que os sacó de la tierra de Egipto. ¡Verdad!',
+          kavana: 'Aceptación incondicional de la soberanía divina y recuerdo de los mandamientos.'
+        },
+        {
+          id: 'sh-9',
+          titulo: 'Amida Sefardi Completa (19 Bendiciones)',
+          subtitulo: 'Patriarcas, Poder, Santidad, Peticiones y Bendición de Paz',
+          instruccion: 'De pie con pies juntos orientados a Jerusalén:',
+          esencial: true,
+          hebreo: 'אֲדֹנָי שְׂפָתַי תִּפְתָּח וּפִי יַגִּיד תְּהִלָּתֶךָ. בָּרוּךְ אַתָּה יְהֹוָה... מָגֵן אַבְרָהָם... מְחַיֵּה הַמֵּתִים... הָאֵל הַקָּדוֹשׁ... חוֹנֵן הַדָּעַת... הָרוֹצֶה בִּתְשׁוּבָה... חַנּוּן הַמַּרְבֶּה לִסְלוֹחַ... גּוֹאֵל יִשְׂרָאֵל... רוֹפֵא חוֹלֵי עַמּוֹ יִשְׂרָאֵל... מְבָרֵךְ הַשָּׁנִים... שׁוֹמֵעַ תְּפִלָּה... שִׂים שָׁלוֹם טוֹבָה וּבְרָכָה... בָּרוּךְ אַתָּה יְהֹוָה הַמְבָרֵךְ אֶת־עַמּוֹ יִשְׂרָאֵל בַּשָּׁלוֹם. אָמֵן.',
+          fonetica: 'Adonái sefatái tiftáj ufí yaguíd tehilatéja. Barúj Atá Adonái... Magén Avrahám... Mejayé hametím... Ha\'Él hakadósh... Jonén hadá\'at... Harotzé bitshuvá... Janún hamarbé lisloaj... Go\'él Yisraél... Rofé jol\'é \'amó Yisraél... Mevaréj hashaním... Shomé\'a tefilá... Sim shalóm tová uvrajá... Barúj Atá Adonái, hamevaréj et-\'amó Yisraél bashalóm. Amén.',
+          espanol: 'Señor, abre mis labios para que mi boca proclame Tu alabanza. Bendito eres Tú, Eterno... Escudo de Abraham... Resucitador de los muertos... El Dios Santo... Que otorga entendimiento... Que anhela el retorno... Clemente que abunda en perdonar... Redentor de Israel... Que sana a los enfermos... Que bendice los años... Que escucha la plegaria... Otorga paz, bienestar y bendición... Bendito eres Tú, Eterno, que bendice a Su pueblo Israel con la paz. Amén.',
+          kavana: 'Encuentro íntimo ante el Creador que abarca salud, sabiduría, justicia y paz.'
+        },
+        {
+          id: 'sh-10',
+          titulo: 'Alenu LeShabeaj',
+          subtitulo: 'Proclamación universal de la soberanía de Dios',
+          instruccion: 'De pie. Inclinarse al decir "Va\'anajnu kor\'im":',
+          esencial: true,
+          hebreo: 'עָלֵינוּ לְשַׁבֵּחַ לַאֲדוֹן הַכֹּל, לָתֵת גְּדֻלָּה לְיוֹצֵר בְּרֵאשִׁית... וַאֲנַחְנוּ כּוֹרְעִים וּמִשְׁתַּחֲוִים וּמוֹדִים לִפְנֵי מֶלֶךְ מַלְכֵי הַמְּלָכִים הַקָּדוֹשׁ בָּרוּךְ הוּא. וְנֶאֱמַר: וְהָיָה יְהֹוָה לְמֶלֶךְ עַל־כָּל־הָאָרֶץ, בַּיּוֹם הַהוּא יִהְיֶה יְהֹוָה אֶחָד וּשְׁמוֹ אֶחָד!',
+          fonetica: '\'Alénu leshabéaj la\'Adón hakol, latét gedulá leYotzér bereshít... Va\'anájnu kor\'ím umishtajavím umodím lifné Mélej maljé hamelajím haKadósh Barúj Hu. Vene\'emár: Vehayá Adonái leMélej \'al-kol-ha\'áretz, bayóm hahú yihyé Adonái Ejád ushmó Ejád!',
+          espanol: 'Nos incumbe alabar al Soberano de todo, atribuir grandeza al Creador del principio... Y nosotros nos arrodillamos, nos postramos y rendimos agradecimiento ante el Rey de reyes de reyes, el Santo, bendito sea. Y fue dicho: Y el Eterno será Rey sobre toda la tierra; en aquel día el Eterno será Uno y Su Nombre Uno.',
+          kavana: 'Sellado de la liturgia matutina proyectando la era de fraternidad y luz universal.'
+        }
+      ],
+      minja: [
+        {
+          id: 'mi-1',
+          titulo: 'Parashat HaKetoret de Minjá',
+          subtitulo: 'Apaciguar el rigor de la tarde con el incienso',
+          instruccion: 'Recitar con sosiego antes de la puesta de sol:',
+          hebreo: 'תִּכּוֹן תְּפִלָּתִי קְטֹרֶת לְפָנֶיךָ, מַשְׂאַת כַּפַּי מִנְחַת עָרֶב.',
+          fonetica: 'Tikón tefilatí ketóret lefanéja, mas\'át kapái minját \'árev.',
+          espanol: 'Establézcase mi plegaria como incienso ante Ti; la elevación de mis manos como la ofrenda de la tarde.',
+          kavana: 'El incienso vespertino eleva los anhelos del alma.'
+        },
+        {
+          id: 'mi-2',
+          titulo: 'Ashrei Yashvei Veiteja',
+          subtitulo: 'Salmo 145 en el atardecer',
+          instruccion: 'Concentrarse en "Poteaj et yadeja":',
+          hebreo: 'אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ, עוֹד יְהַלְלוּךָ סֶּלָה. פּוֹתֵחַ אֶת־יָדֶךָ, וּמַשְׂבִּיעַ לְכָל־חַי רָצוֹן.',
+          fonetica: 'Ashré yoshevé vetéja, \'od yehalelúja séla. Potéaj et-yadéja, umasbía\' lejol-jái ratzón.',
+          espanol: 'Dichosos los que habitan en Tu casa; continuamente Te alabarán. Abres Tu mano y satisfaces el deseo de todo ser vivo.',
+          kavana: 'Agradecer la providencia antes de que caiga el sol.'
+        },
+        {
+          id: 'mi-3',
+          titulo: 'Amida Sefardi de Minja',
+          subtitulo: 'La hora de benevolencia establecida por Isaac',
+          instruccion: 'De pie frente a Jerusalén en silencio:',
+          hebreo: 'אֲדֹנָי, שְׂפָתַי תִּפְתָּח, וּפִי יַגִּיד תְּהִלָּתֶךָ. בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵינוּ וֵאלֹהֵי אֲבוֹתֵינוּ... מָגֵן אַבְרָהָם... שִׂים שָׁלוֹם טוֹבָה וּבְרָכָה.',
+          fonetica: 'Adonái, sefatái tiftáj, ufí yaguíd tehilatéja. Barúj Atá Adonái, Elohénu v-Elohé avoténu... Magén Avrahám... Sim shalóm.',
+          espanol: 'Señor, abre mis labios para que mi boca declare Tu alabanza. Bendito eres Tú, Eterno... Escudo de Abraham... Otorga paz.',
+          kavana: 'Endulzar cualquier dificultad del día con la compasión celestial.'
+        },
+        {
+          id: 'mi-4',
+          titulo: 'Alenu LeShabeaj de Minjá',
+          subtitulo: 'Sellado de la tarde',
+          instruccion: 'De pie:',
+          hebreo: 'עָלֵינוּ לְשַׁבֵּחַ לַאֲדוֹן הַכֹּל... וְהָיָה יְהֹוָה לְמֶלֶךְ עַל־כָּל־הָאָרֶץ, בַּיּוֹם הַהוּא יִהְיֶה יְהֹוָה אֶחָד וּשְׁמוֹ אֶחָד!',
+          fonetica: '\'Alénu leshabéaj la\'Adón hakol... Vehayá Adonái leMélej \'al-kol-ha\'áretz, bayóm hahú yihyé Adonái Ejád ushmó Ejád!',
+          espanol: 'Nos corresponde alabar al Soberano de todo... Y será el Eterno Rey sobre toda la tierra; en aquel día será el Eterno Uno y Su Nombre Uno.',
+          kavana: 'Cierre pacífico de las horas diurnas.'
+        }
+      ],
+      arvit: [
+        {
+          id: 'ar-1',
+          titulo: 'Shir HaMa\'alot & VeHu Rajum',
+          subtitulo: 'Súplica de amparo nocturno',
+          instruccion: 'Al divisar el anochecer:',
+          hebreo: 'שִׁיר הַמַּעֲלוֹת: הִנֵּה בָּרְכוּ אֶת־יְהֹוָה כָּל־עַבְדֵי יְהֹוָה... וְהוּא רַחוּם, יְכַפֵּר עָוֹן וְלֹא יַשְׁחִית, יְהֹוָה הוֹשִׁיעָה!',
+          fonetica: 'Shir hama\'alót: hiné barejú et-Adonái... VeHu rajúm yejapér \'avón veló yashjít, Adonái hoshí\'a!',
+          espanol: 'Cántico de las gradas: He aquí bendigan al Eterno todos los servidores... Y Él, siendo compasivo, expía el pecado y no destruye; ¡Eterno, salva!',
+          kavana: 'Entrega de los temores de la oscuridad a Dios.'
+        },
+        {
+          id: 'ar-2',
+          titulo: 'Keriat Shema Nocturno & Hashkivenu',
+          subtitulo: 'Refugio bajo las alas divinas para el sueño',
+          instruccion: 'Recitar con quietud:',
+          hebreo: 'שְׁמַע יִשְׂרָאֵל, יְהֹוָה אֱלֹהֵינוּ, יְהֹוָה אֶחָד!... הַשְׁכִּיבֵנוּ יְהֹוָה אֱלֹהֵינוּ לְשָׁלוֹם, וְהַעֲמִידֵנוּ מַלְכֵּנוּ לְחַיִּים, וּפְרוֹשׂ עָלֵינוּ סֻכַּת שְׁלוֹמֶךָ.',
+          fonetica: 'SHEMÁ YISRAÉL, ADONÁI ELOHÉNU, ADONÁI EJÁD!... Hashkivénu Adonái Elohénu leshalóm, veha\'amidénu Malkénu lejayím, ufros \'alénu sukát sheloméja.',
+          espanol: '¡Escucha, Israel: el Eterno es nuestro Dios, el Eterno es Uno!... Haznos acostar, Eterno Dios nuestro, en paz; y haznos levantar, Rey nuestro, para la vida, y extiende sobre nosotros la cobertura de Tu paz.',
+          kavana: 'Descanso profundo libre de pesadillas y sobrecarga sensorial.'
+        },
+        {
+          id: 'ar-3',
+          titulo: 'Amida de Arvit & Alenu LeShabeaj',
+          subtitulo: 'Plegaria íntima instituida por Jacob en la soledad de la noche',
+          instruccion: 'En voz baja:',
+          hebreo: 'אֲדֹנָי שְׂפָתַי תִּפְתָּח... שִׂים שָׁלוֹם... עָלֵינוּ לְשַׁבֵּחַ לַאֲדוֹן הַכֹּל. בַּיּוֹם הַהוּא יִהְיֶה יְהֹוָה אֶחָד וּשְׁמוֹ אֶחָד!',
+          fonetica: 'Adonái sefatái tiftáj... Sim shalóm... \'Alénu leshabéaj la\'Adón hakol... Bayóm hahú yihyé Adonái Ejád ushmó Ejád!',
+          espanol: 'Señor, abre mis labios... Otorga paz... Nos incumbe alabar al Dueño de todo... En aquel día será el Eterno Uno y Su Nombre Uno.',
+          kavana: 'Paz para cerrar los ojos confiando el espíritu al Creador.'
+        }
+      ],
+      alimentos: [
+        {
+          id: 'al-1',
+          titulo: 'Bendiciones Previas de la Comida (Birjot HaNehenín)',
+          subtitulo: 'Hamotzí, Mezonót, HaGáfen, Ha\'Étz, HaAdamá, SheHaKól',
+          instruccion: 'Recitar antes de ingerir cada alimento según su especie:',
+          hebreo: '• לֶחֶם: בָּרוּךְ אַתָּה יְהֹוָה... הַמּוֹצִיא לֶחֶם מִן הָאָרֶץ.\n• מְזוֹנוֹת: ...בּוֹרֵא מִינֵי מְזוֹנוֹת.\n• יַיִן: ...בּוֹרֵא פְּרִי הַגָּפֶן.\n• פֵּרוֹת הָעֵץ: ...בּוֹרֵא פְּרִי הָעֵץ.\n• יְרָקוֹת: ...בּוֹרֵא פְּרִי הָאֲדָמָה.\n• מַשְׁקָאוֹת וּשְׁאָר: ...שֶׁהַכֹּל נִהְיָה בִּדְבָרוֹ.',
+          fonetica: '• Pan: Barúj Atá Adonái... hamotzí léjem min ha\'áretz.\n• Cereales/pastas: ...boré miné mezonót.\n• Vino: ...boré perí hagáfen.\n• Fruta de árbol: ...boré perí ha\'étz.\n• Verdura de tierra: ...boré perí ha\'adamá.\n• Agua/otros: ...shehakól nihyá bidvaró.',
+          espanol: '• Pan: Bendito eres Tú... que extrae el pan de la tierra.\n• Harinas: ...Creador de variedades nutritivas.\n• Vino: ...Creador del fruto de la vid.\n• Fruta de árbol: ...Creador del fruto del árbol.\n• Fruta de tierra: ...Creador del fruto de la tierra.\n• Agua/bebidas: ...que todo fue hecho por Su palabra.',
+          kavana: 'Agradecer el sustento antes de disfrutarlo.'
+        },
+        {
+          id: 'al-2',
+          titulo: 'Birkat HaMazon Completo (Nusaj Sefardí de 4 Bendiciones)',
+          subtitulo: 'HaZán, HaÁretz, Boné Yerushalayim, HaTov VeHaMetív',
+          instruccion: 'Lavarse Mayim Ajarónim y sentarse erguido:',
+          hebreo: 'בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, הַזָּן אֶת־הָעוֹלָם כֻּלּוֹ בְּטוּבוֹ... עַל הָאָרֶץ וְעַל הַמָּזוֹן... בּוֹנֵה בְרַחֲמָיו יְרוּשָׁלָיִם... הַמֶּלֶךְ הַטּוֹב וְהַמֵּטִיב לַכֹּל.',
+          fonetica: 'Barúj Atá Adonái, Elohénu Mélej Ha\'Olám, hazán et-ha\'olám kuló betuvó... \'al ha\'áretz ve\'al hamazón... boné verajamáv Yerushaláyim... haMélej haTóv vehaMetív lakól.',
+          espanol: 'Bendito eres Tú, Eterno... que sustenta al mundo entero con bondad... por la tierra y por el sustento... que con misericordia edifica a Jerusalén... el Rey bondadoso que hace el bien a todos.',
+          kavana: 'Reconocer con gratitud no carecer de pan para nutrirse con dignidad.'
+        },
+        {
+          id: 'al-3',
+          titulo: 'Beraja Me\'en Shalosh & Bore Nefashot',
+          subtitulo: 'Bendiciones posteriores tras pasteles, vino o agua',
+          instruccion: 'Recitar al culminar de comer o beber:',
+          hebreo: '• מֵעֵין שָׁלֹשׁ: בָּרוּךְ אַתָּה יְהֹוָה... עַל הָאָרֶץ וְעַל הַמִּחְיָה.\n• בּוֹרֵא נְפָשׁוֹת: בָּרוּךְ אַתָּה יְהֹוָה... בּוֹרֵא נְפָשׁוֹת רַבּוֹת וְחֶסְרוֹנָן, עַל כָּל־מַה שֶּׁבָּרָאתָ. בָּרוּךְ חֵי הָעוֹלָמִים.',
+          fonetica: '• Me\'én Shalósh: Barúj Atá Adonái... \'al ha\'áretz ve\'al hamijyá.\n• Boré Nefashót: Barúj Atá Adonái... boré nefashót rabót vejesronán... Barúj jéi ha\'olamím.',
+          espanol: '• Me\'én Shalosh: Bendito eres Tú... por la tierra y por la nutrición.\n• Boré Nefashót: Bendito eres Tú... Creador de innumerables almas vivas y sus carencias... ¡Bendito sea el Viviente de los mundos!',
+          kavana: 'Gratitud por cada sorbo de agua y alimento reparador.'
+        }
+      ],
+      shabat: [
+        {
+          id: 'shb-1',
+          titulo: 'Encendido de Velas de Shabat',
+          subtitulo: 'Hadlakat Nerot antes de la puesta de sol',
+          instruccion: 'Cubrirse los ojos tras encender las luminarias:',
+          hebreo: 'בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו, וְצִוָּנוּ לְהַדְלִיק נֵר שֶׁל שַׁבָּת.',
+          fonetica: 'Barúj Atá Adonái, Elohénu Mélej Ha\'Olám, ashér kideshánu bemitzvotáv, vetzivánu lehadlík ner shel Shabát.',
+          espanol: 'Bendito eres Tú, Eterno, Dios nuestro, Rey del Universo, que nos santificó con Sus preceptos y nos ordenó encender la vela de Shabat.',
+          kavana: 'Consagración del hogar para una jornada de sosiego, armonía y paz.'
+        },
+        {
+          id: 'shb-2',
+          titulo: 'Kabalat Shabat & Leja Dodi',
+          subtitulo: 'Recepción afectuosa a la Reina del Shabat',
+          instruccion: 'Girar hacia la entrada en la última estrofa:',
+          hebreo: 'לְכָה דוֹדִי לִקְרַאת כַּלָּה, פְּנֵי שַׁבָּת נְקַבְּלָה! מִזְמוֹר שִׁיר לְיוֹם הַשַּׁבָּת: טוֹב לְהֹדוֹת לַיהֹוָה... צַדִּיק כַּתָּמָר יִפְרָח!',
+          fonetica: 'Lejá Dodí likrát kalá, pené Shabát nekabelá! Mizmór shir leyóm haShabát: Tov lehodót l\'Adonái... Tzadik katamár yifráj!',
+          espanol: '¡Ven amado mío al encuentro de la novia; recibamos la presencia del Shabat! Cántico para el día de Shabat: Bueno es dar gracias al Eterno... ¡El justo florecerá como la palmera!',
+          kavana: 'Rejuvenecer el alma dejando atrás todo el desgaste semanal.'
+        },
+        {
+          id: 'shb-3',
+          titulo: 'Kidush Nocturno sobre el Vino (Yom HaShishi)',
+          subtitulo: 'Shalom Alejem, Eshet Jayil y bendición del vino',
+          instruccion: 'Sostener la copa colmada con la mano derecha:',
+          hebreo: 'יוֹם הַשִּׁשִּׁי. וַיְכֻלּוּ הַשָּׁמַיִם וְהָאָרֶץ וְכָל־צְבָאָם... סַבְרִי מָרָנָן! בָּרוּךְ אַתָּה יְהֹוָה, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, בּוֹרֵא פְּרִי הַגָּפֶן. בָּרוּךְ אַתָּה יְהֹוָה, מְקַדֵּשׁ הַשַּׁבָּת.',
+          fonetica: 'Yom hashishí. Vayejulú hashamáyim veha\'áretz... Savrí maranán! Barúj Atá Adonái... boré perí hagáfen... mekadésh haShabát.',
+          espanol: 'El día sexto. Y fueron concluidos los cielos y la tierra y todas sus huestes... ¡Con vuestra anuencia! Bendito eres Tú, Eterno... Creador del fruto de la vid... que santifica el Shabat.',
+          kavana: 'Testificar la Creación del mundo y la bendición del día de descanso.'
+        },
+        {
+          id: 'shb-4',
+          titulo: 'Havdala de Salida de Shabat',
+          subtitulo: 'Copa de vino, especias aromáticas (Besamim) y vela de fuego',
+          instruccion: 'Oler las especias y mirar las uñas frente a la llama:',
+          hebreo: 'כּוֹס יְשׁוּעוֹת אֶשָּׂא... בּוֹרֵא פְּרִי הַגָּפֶן... בּוֹרֵא מִינֵי בְשָׂמִים... בּוֹרֵא מְאוֹרֵי הָאֵשׁ... הַמַּבְדִּיל בֵּין קֹדֶשׁ לְחוֹל.',
+          fonetica: 'Kos yeshu\'ót esá... boré perí hagáfen... boré miné vesamím... boré me\'oré ha\'ésh... hamavdíl ben kódesh lejól.',
+          espanol: 'Alzaré la copa de las salvaciones... Creador del fruto de la vid... Creador de variedades de especias aromáticas... Creador de las luminarias del fuego... que distingue entre lo sagrado y lo profano.',
+          kavana: 'Transición lúcida y pacífica hacia la semana de trabajo con ánimo fortalecido.'
+        }
+      ],
+      moadim: [
+        {
+          id: 'mo-1',
+          titulo: 'Seder Simanim de Rosh Hashana (Completo)',
+          subtitulo: 'Dátil, frijol, puerro, acelga, calabaza, zanahoria, granada, manzana con miel y cabeza',
+          instruccion: 'Comer un bocado de cada alimento y recitar su Yehi Ratzón:',
+          hebreo: '1. תָּמָר (Dátil): שֶׁיִּתַּמּוּ אוֹיְבֵינוּ וְשׂוֹנְאֵינוּ וְכָל־מְבַקְשֵׁי רָעָתֵנוּ.\n2. רוּבְּיָא (Frijol): שֶׁיִּרְבּוּ זָכִיּוֹתֵינוּ.\n3. כַּרְתֵּי (Puerro): שֶׁיִּכָּרְתוּ אוֹיְבֵינוּ.\n4. סִלְקָא (Acelga): שֶׁיִּסְתַּלְּקוּ אוֹיְבֵינוּ.\n5. קְרָא (Calabaza): שֶׁתִּקְרַע רוֹעַ גְּזַר דִּינֵנוּ.\n6. גֶּזֶר (Zanahoria): שֶׁתִּגְזֹר עָלֵינוּ גְּזֵרוֹת טוֹבוֹת.\n7. רִמּוֹן (Granada): שֶׁנִּהְיֶה מְלֵאִים מִצְוֹת כָּרִמּוֹן.\n8. תַּפּוּחַ בִּדְבַשׁ (Manzana con miel): שֶׁתְּחַדֵּשׁ עָלֵינוּ שָׁנָה טוֹבָה וּמְתוּקָה כַּדְּבָשׁ.\n9. רֹאשׁ (Cabeza): שֶׁנִּהְיֶה לְרֹאשׁ וְלֹא לְזָנָב.',
+          fonetica: '1. Tamar: Sheyitamú oyevénu...\n2. Ruvyá: Sheyirbú zajiyoténu...\n3. Kartí: Sheyikaretú oyevénu...\n4. Silká: Sheyistalekú oyevénu...\n5. Kar\'á: Shetikrá\' róa\' gezár dinénu...\n6. Guézer: Shetigzór \'alénu gezerót tovót...\n7. Rimón: Shenihyé mele\'ím mitzvót karimón...\n8. Tapúaj biDvash: Shetejadésh \'alénu shaná tová umtuká kadvásh...\n9. Rosh: Shenihyé lerosh veló lezanáv.',
+          espanol: '1. Dátil: Que se extingan quienes buscan nuestro mal.\n2. Frijoles: Que se multipliquen nuestros méritos.\n3. Puerro: Sean cercenados los rencores.\n4. Acelga: Sean apartados los obstáculos.\n5. Calabaza: Que desgarres cualquier veredicto adverso.\n6. Zanahoria: Que decretes bendiciones favorables.\n7. Granada: Que estemos llenos de buenas acciones como la granada de granos.\n8. Manzana con miel: ¡Que renueves para nosotros un año bueno y dulce como la miel!\n9. Cabeza: Que seamos cabeza y no cola.',
+          kavana: 'Pedir con optimismo un año nuevo lleno de bondad, dulzura y serenidad.'
+        },
+        {
+          id: 'mo-2',
+          titulo: 'Viduy y Al Jet de Yom Kipur',
+          subtitulo: 'Confesión alfabética acróstica sefardí y expiación',
+          instruccion: 'Golpear suavemente el pecho con el puño cerrado:',
+          hebreo: 'עַל חֵטְא שֶׁחָטָאנוּ לְפָנֶיךָ בְּאֹנֶס וּבְרָצוֹן... וְעַל כֻּלָּם, אֱלוֹהַּ סְלִיחוֹת, סְלַח לָנוּ, מְחַל לָנוּ, כַּפֶּר לָנוּ! כִּי בַיּוֹם הַזֶּה יְכַפֵּר עֲלֵיכֶם לְטַהֵר אֶתְכֶם מִכֹּל חַטֹּאתֵיכֶם, לִפְנֵי יְהֹוָה תִּטְהָרוּ!',
+          fonetica: '\'Al jet shejatánu lefanéja be\'ónes uvratzón... Ve\'al kulám, Elóha selijót, seláj lánu, mejál lánu, kapér lánu! Ki vayóm hazé yejapér \'aleijém letaher etjém mikól jat\'otejém, lifné Adonái tit-háru!',
+          espanol: 'Por el error que cometimos ante Ti involuntariamente o por voluntad... Y por todos ellos, Dios de los perdones: perdónanos, absuélvenos, expíanos. Porque en este día se os otorgará expiación para purificaros de todas vuestras faltas; ¡ante el Eterno seréis purificados!',
+          kavana: 'El consuelo del perdón absoluto y el renacer del alma a su blancura prístina.'
+        }
+      ]
+    };
+
+    // ESTADO PERSISTENTE EN LOCALSTORAGE
+    let currentCategory = localStorage.getItem('sidur_cat') || 'shajarit';
+    let currentViewMode = localStorage.getItem('sidur_view') || 'interlinear';
+    let currentFontSize = parseInt(localStorage.getItem('sidur_font') || '18', 10);
+    let currentTheme = localStorage.getItem('sidur_theme') || 'dark';
+    let isCampanaActive = localStorage.getItem('sidur_campana') === 'true';
+
+    // APLICAR TEMA
+    function applyTheme(theme) {
+      currentTheme = theme;
+      document.body.className = 'theme-' + theme;
+      const themeBtn = document.getElementById('themeBtn');
+      if (theme === 'dark') themeBtn.innerHTML = '🌑 OLED';
+      else if (theme === 'sepia') themeBtn.innerHTML = '📜 Sepia';
+      else themeBtn.innerHTML = '☀️ Luz';
+      localStorage.setItem('sidur_theme', theme);
+    }
+
+    function cycleTheme() {
+      if (currentTheme === 'dark') applyTheme('sepia');
+      else if (currentTheme === 'sepia') applyTheme('light');
+      else applyTheme('dark');
+    }
+
+    // APLICAR FUENTE
+    function applyFontSize(size) {
+      currentFontSize = Math.min(26, Math.max(16, size));
+      document.documentElement.style.setProperty('--font-size-base', currentFontSize + 'px');
+      localStorage.setItem('sidur_font', currentFontSize);
+    }
+
+    function changeFontSize(delta) {
+      applyFontSize(currentFontSize + delta);
+    }
+
+    // VISTA TRIPARTITA
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      localStorage.setItem('sidur_view', mode);
+      document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-' + mode.replace('_only', ''));
+      if (activeBtn) activeBtn.classList.add('active');
+      renderPrayers();
+    }
+
+    // MODO CAMPAÑA
+    function toggleCampana(active) {
+      isCampanaActive = active;
+      localStorage.setItem('sidur_campana', active);
+      renderPrayers();
+    }
+
+    // MENÚ DRAWER
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('drawerOverlay');
+      if (open) {
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+      } else {
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+    }
+
+    function selectCategory(cat) {
+      currentCategory = cat;
+      localStorage.setItem('sidur_cat', cat);
+      toggleDrawer(false);
+
+      // Mostrar u ocultar banner de Modo Campaña según sea Shajarit
+      const campanaBanner = document.getElementById('campanaBanner');
+      campanaBanner.style.display = (cat === 'shajarit') ? 'flex' : 'none';
+
+      // Actualizar título
+      const titles = {
+        shajarit: 'Shajarit Sefardí (שחרית)',
+        minja: 'Minjá Sefardí (מנחה)',
+        arvit: 'Arvit Sefardí (ערבית)',
+        alimentos: 'Alimentos y Birkat HaMazón (ברכות)',
+        shabat: 'Shabat Kódesh y Havdalá (שבת)',
+        moadim: 'Moadim (Rosh Hashaná / Kipur)'
+      };
+      document.getElementById('currentSectionTitle').innerText = titles[cat] || 'Sidur Sefardí';
+
+      // Actualizar estilo en drawer
+      document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+
+      renderPrayers();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // RENDERIZADOR DE PLEGARIAS (MICRO-TARJETAS)
+    function renderPrayers() {
+      const container = document.getElementById('prayerContainer');
+      const prayers = PRAYERS_DATA[currentCategory] || [];
+
+      // Filtrar por modo campaña si aplica
+      const filtered = (currentCategory === 'shajarit' && isCampanaActive)
+        ? prayers.filter(p => p.esencial)
+        : prayers;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="micro-card"><p>No hay oraciones para mostrar.</p></div>';
+        return;
+      }
+
+      let html = '';
+
+      filtered.forEach((p, idx) => {
+        if (currentViewMode === 'parallel') {
+          // VISTA DE COLUMNAS PARALELAS DESLIZABLES
+          html += `
+            <div class="micro-card" id="card-${p.id}">
+              <div class="card-meta">
+                <span class="card-title">${p.titulo}</span>
+                <span class="card-badge">${idx + 1} / ${filtered.length}</span>
+              </div>
+              ${p.instruccion ? `<div class="instruccion-box">${p.instruccion}</div>` : ''}
+              <div class="parallel-carousel">
+                <div class="parallel-column">
+                  <div class="parallel-col-header">Hebreo Masorético (RTL)</div>
+                  <div class="layer-hebrew">${p.hebreo}</div>
+                </div>
+                <div class="parallel-column">
+                  <div class="parallel-col-header">Fonética Adaptada (LTR)</div>
+                  <div class="layer-phonetic">${p.fonetica}</div>
+                </div>
+                <div class="parallel-column">
+                  <div class="parallel-col-header">Traducción al Español (LTR)</div>
+                  <div class="layer-spanish">${p.espanol}</div>
+                </div>
+              </div>
+              ${p.kavana ? `<div class="kavana-box"><span>💡 Kavaná:</span> ${p.kavana}</div>` : ''}
+            </div>
+          `;
+        } else {
+          // VISTAS SEGÚN MODO SELECCIONADO
+          const showHebrew = (currentViewMode === 'interlinear' || currentViewMode === 'hebrew_only');
+          const showPhonetic = (currentViewMode === 'interlinear' || currentViewMode === 'phonetic_only');
+          const showSpanish = (currentViewMode === 'interlinear' || currentViewMode === 'spanish_only');
+
+          html += `
+            <div class="micro-card" id="card-${p.id}">
+              <div class="card-meta">
+                <span class="card-title">${p.titulo}</span>
+                <span class="card-badge">${idx + 1} / ${filtered.length}</span>
+              </div>
+              ${p.instruccion ? `<div class="instruccion-box">${p.instruccion}</div>` : ''}
+              
+              ${showHebrew ? `
+                <div class="layer-hebrew">${p.hebreo}</div>
+              ` : ''}
+
+              ${showHebrew && (showPhonetic || showSpanish) ? `<div class="layer-divider"></div>` : ''}
+
+              ${showPhonetic ? `
+                <div class="layer-phonetic">${p.fonetica}</div>
+              ` : ''}
+
+              ${showPhonetic && showSpanish ? `<div class="layer-divider"></div>` : ''}
+
+              ${showSpanish ? `
+                <div class="layer-spanish">${p.espanol}</div>
+              ` : ''}
+
+              ${p.kavana ? `<div class="kavana-box"><span>💡 Kavaná:</span> ${p.kavana}</div>` : ''}
+            </div>
+          `;
+        }
+      });
+
+      container.innerHTML = html;
+    }
+
+    // INICIALIZACIÓN
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme(currentTheme);
+      applyFontSize(currentFontSize);
+      document.getElementById('campanaToggle').checked = isCampanaActive;
+      
+      const activeBtn = document.getElementById('btn-' + currentViewMode.replace('_only', ''));
+      if (activeBtn) {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        activeBtn.classList.add('active');
+      }
+
+      selectCategory(currentCategory);
+    });
+  </script>
+</body>
+</html>
